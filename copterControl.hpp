@@ -1,4 +1,5 @@
 #include <iostream>
+#include <math.h>
 #include <string>
 #include <vector>
 
@@ -15,11 +16,11 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/SetMode.h>
-#include <mavros_msgs/SetMavFrame.h>
 #include <mavros_msgs/Altitude.h>
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/trajectory.h>
 #include <mavros_msgs/PositionTarget.h>
+#include <nav_msgs/Odometry.h>
 
 
 ros::Publisher setPosition;
@@ -28,9 +29,10 @@ ros::Publisher setAccel;
 ros::Publisher waypointTraj;
 ros::Publisher bezierTraj;
 ros::Subscriber currState;
+ros::Subscriber currPose;
+ros::Subscriber AltInfo;
 ros::ServiceClient mavMode;
 ros::ServiceClient mavArming;
-ros::ServiceClient mavFrame;
 ros::ServiceClient takeoff;
 ros::ServiceClient land;
 
@@ -48,19 +50,75 @@ typedef struct bezier
     float32 time;
 };
 
-void setMode(string mode = "GUIDED")
+waypoint transformPosetoWay(geometry_msgs::Pose PoseVal)
+{
 
-void setFrame(string frame = "LOCAL_NED")
+}
 
-void arm()
+bool setMode(std::string mode = "GUIDED")
+{
+	mavros_msgs::SetMode srvMode;
 
-void cmdTakeoff(float alti)
+    srvMode.request.base_mode = 0;
+    srvMode.request.custom_mode = mode.c_str();
+
+    if(mavMode.call(srvMode))
+    {
+      ROS_INFO("Requested mode is set.");
+	  return true;
+    }
+    else
+    {
+      ROS_ERROR("Failed to set requested mode.");
+      return false;
+    }
+}
+
+bool arm()
+{
+    ROS_INFO("Arming drone");
+
+	mavros_msgs::CommandBool arm_request;
+	arm_request.request.value = true;
+
+	while (!currState.armed && !arm_request.response.success && ros::ok())
+	{
+		ros::Duration(.1).sleep();
+		currState.call(arm_request);
+	}
+
+	if(arm_request.response.success)
+	{
+		ROS_INFO("Arming Successful");	
+		return true;
+	}
+    else
+    {
+		ROS_INFO("Arming failed with %d", arm_request.response.success);
+		return false;
+	}
+}
 
 void cmdLand()
 
-bool checkPosTgt(float linTol, float orientTol)
+bool checkPosTgt(float linTol = 0.5, float orientTol = 0.1)
 
 void gotoPos(waypoint Target)
+
+void cmdTakeoff(float alti)
+{
+    mavros_msgs::CommandTOLLocal takeoffPoint;
+
+    takeoffPoint.request.Position.z = alti;
+
+    while(!takeoff_request.response.success && ros::ok())
+    {
+        ros::Duration(.1).sleep();
+        takeoff.call(takeoff_request);
+    }
+
+    if(abs(AltInfo - alti) < 0.5)
+}
 
 bool checkVelTgt(float velTol)
 
