@@ -43,6 +43,14 @@ ros::ServiceClient land;
 
 float initAlti;
 
+typedef struct waypoint
+{
+	float x;
+    float y;
+    float z;
+    float psi;
+};
+
 typedef struct vec
 {
     float x;
@@ -219,6 +227,9 @@ void attainVel(float vx, float vy, float vz)
     tgtVel.twist.linear.z = vz;
 
     velPub.publish(tgtVel);
+
+	while(!checkVelTgt)
+        ros::Duration(.1).sleep();
 }
 
 bool checkAccelTgt(float accelTol = 0.01)
@@ -237,6 +248,9 @@ void attainAccel(float ax, float ay, float az)
     tgtAccel.vector.z = az;
 
     accelPub.publish(tgtAccel);
+
+	while(!checkAccelTgt)
+        ros::Duration(.1).sleep();
 }
 
 void trajAllocate(trajectory desTraj[], int a, int b)
