@@ -18,4 +18,5 @@ This repository provides a `C++` library for controlling Unmanned Aerial Vehicle
 `void createTraj(trajectory desTraj[])` : This function taked as input an array of type `trajectory` defined in the library. Each element of this array contains the LOCAL_NED Pose, Velocity and Acceleration vectors as well as the yaw and yaw-rate at those points. `type` is also an argument in this structure which takes two possible values:
 * `type = 0` for Waypoint Trajectory
 * `type = 1` for Bezier Trajectory (Note: this feature has not been refined, hence it is advised not to use this until it has been).
+
 This function utilizes the `mavros_msgs/Trajectory` message that generates a smooth trajectory between 5 well-defined points for any given frame.
